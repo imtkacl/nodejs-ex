@@ -88,7 +88,8 @@ app.get('/pagecount', function (req, res) {
       res.send('{ pageCount: ' + count + '}');
     });
   } else {
-    res.send('{ pageCount: 0 }');
+    //res.send('{ pageCount: 0 }');
+      res.send(req.headers);
   }
 });
 
