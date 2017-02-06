@@ -3,8 +3,7 @@ var express = require('express'),
     fs      = require('fs'),
     app     = express(),
     eps     = require('ejs'),
-    morgan  = require('morgan'),
-    bodyParser = require('body-parser');
+    morgan  = require('morgan');
     
 Object.assign=require('object-assign')
 
@@ -96,10 +95,7 @@ app.get('/pagecount', function (req, res) {
 
 app.post('/oauth2/token', function (req, res) {
     
-  app.use(bodyParser.urlencoded({
-    extended: true
-  }));
-  app.use(bodyParser.json());
+  app.use(express.bodyParser());
   // try to initialize the db on every request if it's not already
   // initialized.
   console.log(req)
