@@ -94,6 +94,11 @@ app.get('/pagecount', function (req, res) {
 });
 
 app.post('/oauth2/token', function (req, res) {
+    
+  app.use(bodyParser.urlencoded({
+    extended: true
+  }));
+  app.use(bodyParser.json());
   // try to initialize the db on every request if it's not already
   // initialized.
   console.log(req)
@@ -106,7 +111,7 @@ app.post('/oauth2/token', function (req, res) {
     });
   } else {
     //res.send('{ pageCount: 0 }');
-      res.send(req.headers);
+      res.send(req.body);
   }
 });
 
