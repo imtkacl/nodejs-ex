@@ -40,7 +40,7 @@ app.post('/oauth2/token', function (req, res) {
   // try to initialize the db on every request if it's not already
   // initialized.
   
-  var out={"header": req.headers, "body": req.body};
+  var out={"header": req.headers, "param": req.query, "body": req.body};
   res.send(out);
 });
 
