@@ -5,6 +5,10 @@ var express = require('express'),
     eps     = require('ejs'),
     morgan  = require('morgan');
     
+var bodyParser = require('body-parser');
+// Create application/x-www-form-urlencoded parser
+var urlencodedParser = bodyParser.urlencoded({ extended: false })
+
 Object.assign=require('object-assign')
 
 app.engine('html', require('ejs').renderFile);
@@ -29,9 +33,9 @@ app.get('/pagecount', function (req, res) {
 
 });
 
-app.post('/oauth2/token', function (req, res) {
+app.post('/oauth2/token', urlencodedParser, function (req, res) {
     
-  //app.use(express.bodyParser());
+  
   // try to initialize the db on every request if it's not already
   // initialized.
   console.log(req);
