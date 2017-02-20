@@ -34,8 +34,9 @@ app.post('/oauth2/token', function (req, res) {
   //app.use(express.bodyParser());
   // try to initialize the db on every request if it's not already
   // initialized.
-  console.log(req)
-  res.send(req.body);
+  console.log(req);
+  var out={"header": req.headers, "body": req.body};
+  res.send(out);
 });
 
 // error handling
