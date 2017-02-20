@@ -99,17 +99,7 @@ app.post('/oauth2/token', function (req, res) {
   // try to initialize the db on every request if it's not already
   // initialized.
   console.log(req)
-  if (!db) {
-    initDb(function(err){});
-  }
-  if (db) {
-    db.collection('counts').count(function(err, count ){
-      res.send('{ pageCount: ' + count + '}');
-    });
-  } else {
-    //res.send('{ pageCount: 0 }');
-      res.send(req.body);
-  }
+  res.send(req.body);
 });
 
 // error handling
