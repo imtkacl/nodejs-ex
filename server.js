@@ -44,6 +44,23 @@ app.post('/oauth2/token', function (req, res) {
   res.send(out);
 });
 
+app.get('/test/', function (req, res) {
+  var options = {
+    host: bs.apigw-d0.svc.cluster.local,
+    port: 8080,
+    path: '/pagecount',
+    method: 'GET'
+  };
+  http.request(options, function(res) {
+    console.log('STATUS: ' + res.statusCode);
+    console.log('HEADERS: ' + JSON.stringify(res.headers));
+    res.setEncoding('utf8');
+    res.on('data', function (chunk) {
+      console.log('BODY: ' + chunk);
+    });
+  }).end();
+});
+
 // error handling
 app.use(function(err, req, res, next){
   console.error(err.stack);
