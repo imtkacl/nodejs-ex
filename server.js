@@ -50,16 +50,24 @@ app.get('/test/', function (req, res) {
     url: 'http://bs.apigw-d0.svc.cluster.local:8080/pagecount',
     method: 'GET'
   };
-  request(options, function (error, res, body) {
-      console.log('error: '+error);
-      console.log('res: '+res);
-      console.log('body: '+body);
-//    console.log('STATUS: ' + res.statusCode);
-//    console.log('HEADERS: ' + JSON.stringify(res.headers));
-//    res.setEncoding('utf8');
-//    res.on('data', function (chunk) {
-//      console.log('BODY: ' + chunk);
+  request(options, function (error, response, body) {
+    console.log('error: '+error);
+    console.log('response: '+response);
+    console.log('body: '+body);
+//  console.log('STATUS: ' + res.statusCode);
+//  console.log('HEADERS: ' + JSON.stringify(res.headers));
+//  res.setEncoding('utf8');
+//  res.on('data', function (chunk) {
+//    console.log('BODY: ' + chunk);
 //    });
+    if (error){
+      res.status(500).send(error);  
+    }else if (response.statusCode == 200) {
+      res.status(response.statusCode).send(body);
+    }else{
+      res.status(response.statusCode).send(body);
+    }
+    
   });
 });
 
