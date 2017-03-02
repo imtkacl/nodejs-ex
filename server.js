@@ -74,7 +74,7 @@ app.get('/testBackEnd/', function (req, res) {
 
 app.get('/test', function (req, res) {
     var opts = {
-      filter: '(cn=IMTKACL)',
+      filter: '(cn=OAuthTestUser1)',
       scope: 'sub',
       attributes: ['dn']
     };
@@ -90,17 +90,19 @@ app.get('/test', function (req, res) {
           client.unbind(function(error) {if(error){console.log(error.message);} else{console.log('client disconnected');}});
         } else {
           console.log('connected');
-          client.search('OU=Users,OU=CX,DC=nwow001,DC=corp,DC=ete,DC=cathaypacific,DC=com', opts, function(error, search) {
+          client.search('OU=IMT,OU=CLK,OU=HQ,OU=Users,OU=CPA,DC=nwow001,DC=corp,DC=ete,DC=cathaypacific,DC=com', opts, function(error, search) {
             console.log('Searching.....');
 
             search.on('searchEntry', function(entry) {
               if(entry.object){
                 console.log('entry: %j ' + JSON.stringify(entry.object));
+                res.send('entry: %j ' + JSON.stringify(entry.object));
               }
             });
 
             search.on('error', function(error) {
-              console.error('error: ' + error.message);
+              console.error('error in searching: ' + error.message);
+              res.send('error in searching: ' + error.message);
             });
 
             client.unbind(function(error) {if(error){console.log(error.message);} else{console.log('client disconnected');}});
@@ -111,7 +113,9 @@ app.get('/test', function (req, res) {
     } catch(error){
       console.log(error);
       client.unbind(function(error) {if(error){console.log(error.message);} else{console.log('client disconnected');}});
+      res.send('error in binding: ' + error.message);
     }
+    
 });
 
 // error handling
