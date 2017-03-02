@@ -46,7 +46,7 @@ app.post('/oauth2/token', function (req, res) {
 
 app.get('/test/', function (req, res) {
   var options = {
-    host: bs.apigw-d0.svc.cluster.local,
+    host: 'bs.apigw-d0.svc.cluster.local',
     port: 8080,
     path: '/pagecount',
     method: 'GET'
