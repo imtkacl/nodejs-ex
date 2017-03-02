@@ -4,7 +4,8 @@ var express = require('express'),
     app     = express(),
     eps     = require('ejs'),
     morgan  = require('morgan'),
-    request = require('request');
+    request = require('request'),
+    ldap = require('ldapjs');
     
 var bodyParser = require('body-parser');
 // Create application/x-www-form-urlencoded parser
@@ -45,13 +46,13 @@ app.post('/oauth2/token', function (req, res) {
   res.send(out);
 });
 
-app.get('/test/', function (req, res) {
+app.get('/testBackEnd/', function (req, res) {
   var options = {
     url: 'http://kong-proxy.apigw-d0.svc.cluster.local:8000/pagecount',
     method: 'GET'
   };
   request(options, function (error, response, body) {
-    console.log('error: '+error);
+    console.log('error: '+error.stack);
     console.log('response: '+response);
     console.log('body: '+body);
 //  console.log('STATUS: ' + res.statusCode);
@@ -69,6 +70,28 @@ app.get('/test/', function (req, res) {
     }
     
   });
+});
+
+app.get('/test', function (req, res) {
+    var client = ldap.createClient({
+      url: 'ldap://ADDS.ETE.CATHAYPACIFIC.COM/cn=OAuthTestUser1,OU=IMT,OU=CLK,OU=HQ,OU=Users,OU=CPA,DC=nwow001,DC=corp,DC=ete,DC=cathaypacific,DC=com',
+      timeout: 5000,
+      connectTimeout: 10000
+    });
+    try {
+      client.bind('OAuthTestUser1', 'OAuthTestUser1', function (error) {
+        if(error){
+          console.log(error.message);
+          client.unbind(function(error) {if(error){console.log(error.message);} else{console.log('client disconnected');}});
+        } else {
+          console.log('connected');
+          client.unbind(function(error) {if(error){console.log(error.message);} else{console.log('client disconnected');}});
+        }
+      });
+    } catch(error){
+      console.log(error);
+      client.unbind(function(error) {if(error){console.log(error.message);} else{console.log('client disconnected');}});
+    }
 });
 
 // error handling
