@@ -47,19 +47,17 @@ app.post('/oauth2/token', function (req, res) {
 
 app.get('/test/', function (req, res) {
   var options = {
-    host: 'bs.apigw-d0.svc.cluster.local',
-    port: 8080,
-    path: '/pagecount',
+    url: 'http://bs.apigw-d0.svc.cluster.local:8080/pagecount',
     method: 'GET'
   };
-  request.request(options, function(res) {
+  request(options, function(res) {
     console.log('STATUS: ' + res.statusCode);
     console.log('HEADERS: ' + JSON.stringify(res.headers));
     res.setEncoding('utf8');
     res.on('data', function (chunk) {
       console.log('BODY: ' + chunk);
     });
-  }).end();
+  });
 });
 
 // error handling
