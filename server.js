@@ -47,7 +47,7 @@ app.post('/oauth2/token', function (req, res) {
 
 app.get('/test/', function (req, res) {
   var options = {
-    url: 'http://bs.apigw-d0.svc.cluster.local:8080/pagecount',
+    url: 'http://kong-proxy.apigw-d0.svc.cluster.local:8000/pagecount',
     method: 'GET'
   };
   request(options, function (error, response, body) {
