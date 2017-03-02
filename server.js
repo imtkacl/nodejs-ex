@@ -3,7 +3,8 @@ var express = require('express'),
     fs      = require('fs'),
     app     = express(),
     eps     = require('ejs'),
-    morgan  = require('morgan');
+    morgan  = require('morgan'),
+    request = require('request');
     
 var bodyParser = require('body-parser');
 // Create application/x-www-form-urlencoded parser
@@ -51,7 +52,7 @@ app.get('/test/', function (req, res) {
     path: '/pagecount',
     method: 'GET'
   };
-  http.request(options, function(res) {
+  request.request(options, function(res) {
     console.log('STATUS: ' + res.statusCode);
     console.log('HEADERS: ' + JSON.stringify(res.headers));
     res.setEncoding('utf8');
