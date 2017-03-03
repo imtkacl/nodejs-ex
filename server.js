@@ -227,7 +227,7 @@ function createOnUserVerifyFailHandler(res) {
 	}
 }
 
-function verifyLdapUser(loginUsername, loginPassword, onUserVerifySuccess, onUserVerifyFail) {
+function verifyLdapUser(res, loginUsername, loginPassword, onUserVerifySuccess, onUserVerifyFail) {
 	var systemUsername = 'OAuthTestUser1';
 	var systemPassword = 'OAuthTestUser1';
 	var systemDnSuffix = 'OU=IMT,OU=CLK,OU=HQ,OU=Users,OU=CPA,DC=nwow001,DC=corp,DC=ete,DC=cathaypacific,DC=com';
@@ -270,6 +270,7 @@ function verifyLdapUser(loginUsername, loginPassword, onUserVerifySuccess, onUse
 
 app.get('/test', function (req, res) {
 	var userVerified = verifyLdapUser(
+			res,
 			extractUsernameFromRequest(req),
 			extractPasswordFromRequest(req),
 			createOnUserVerifySuccessHandler(res),
