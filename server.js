@@ -160,6 +160,7 @@ app.get('/test', function (req, res) {
                       console.log('Binded with DN: '+loginUserDn);
                       client.unbind(function(error) {if(error){console.log('Unable to unbind: '+error.message);} else{console.log('client disconnected');}});
                       res.send('Binded with DN: '+loginUserDn);
+                    }
                   });
                 }
               });
