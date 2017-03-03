@@ -84,7 +84,7 @@ app.get('/test', function (req, res) {
 
     if (req.body.username!=null){
       loginUsername=req.body.username;
-    else if(req.headers.username!=null){
+    }else if(req.headers.username!=null){
       loginUsername=req.headers.username;
     }
     if (req.body.password!=null){
