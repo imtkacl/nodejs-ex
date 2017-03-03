@@ -99,7 +99,7 @@ function extractPasswordFromRequest(req) {
 }
 
 function assertUsernamePassword(userSearchInfo) {
-	if (loginUsername == null || loginPassword == null) {
+	if (userSearchInfo.loginUsername == null || userSearchInfo.loginPassword == null) {
 		userSearchInfo.errorMessage = 'Invalid username: ' + userSearchInfo.loginUsername + ' or password ' + userSearchInfo.loginPassword;
 		console.log(userSearchInfo.errorMessage);
 		return false;
