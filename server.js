@@ -102,21 +102,29 @@ app.get('/test', function (req, res) {
           };
           client.search(loginDnSuffix, opts, function(error, search) {
             console.log('Searching for '+loginUsername);
-
-            search.on('searchEntry', function(entry) {
-              if(entry.object){
-                console.log('Found DN: ' + JSON.stringify(entry.object));
-                client.unbind(function(error) {if(error){console.log('Unable to unbind: '+error.message);} else{console.log('client disconnected');}});
-                res.send('Found DN: ' + JSON.stringify(entry.object));
-              }
-            });
-
-            search.on('error', function(error) {
-              console.error('error in searching with loginUsername: '+loginUsername+' with error ' + error.message);
+            if(error){
+              console.log('Unable to search with loginUsername: '+loginUsername+' with error '+error.message);
               client.unbind(function(error) {if(error){console.log('Unable to unbind: '+error.message);} else{console.log('client disconnected');}});
-              res.send('error in searching with loginUsername: '+loginUsername+' with error ' + error.message);
-            });
+              res.send('Unable to search with loginUsername: '+loginUsername+' with error '+error.message);
+            }else{
+            
+              search.on('searchEntry', function(entry) {
+                if(entry.object){
+                  console.log('Found DN: ' + JSON.stringify(entry.object));
+                  res.send('Found DN: ' + JSON.stringify(entry.object));
+                }
+              });
 
+              search.on('error', function(error) {
+                console.error('error in searching with loginUsername: '+loginUsername+' with error ' + error.message);
+                res.send('error in searching with loginUsername: '+loginUsername+' with error ' + error.message);
+              });
+
+              search.on('end', function(result) {
+                console.log('status: ' + result.status);
+                client.unbind(function(error) {if(error){console.log('Unable to unbind: '+error.message);} else{console.log('client disconnected');}});
+              });
+            }
           });
         }
       });
