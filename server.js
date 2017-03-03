@@ -73,24 +73,33 @@ app.get('/testBackEnd/', function (req, res) {
 });
 
 app.get('/test', function (req, res) {
-    var opts = {
-      filter: '(cn=OAuthTestUser1)',
-      scope: 'sub',
-      attributes: ['dn']
-    };
+    var systemUsername='OAuthTestUser1';
+    var systemPassword='OAuthTestUser1';
+    var systemDnSuffix='OU=IMT,OU=CLK,OU=HQ,OU=Users,OU=CPA,DC=nwow001,DC=corp,DC=ete,DC=cathaypacific,DC=com';
+    var ldapHost='ADDS.ETE.CATHAYPACIFIC.COM';
+    var ldapPort='389';
+    var loginUsername='OAuthTestUser1';
+    var loginPassword='OAuthTestUser1';
+    var loginDnSuffix='OU=IMT,OU=CLK,OU=HQ,OU=Users,OU=CPA,DC=nwow001,DC=corp,DC=ete,DC=cathaypacific,DC=com';
+
     var client = ldap.createClient({
-      url: 'ldap://ADDS.ETE.CATHAYPACIFIC.COM/cn=OAuthTestUser1,OU=IMT,OU=CLK,OU=HQ,OU=Users,OU=CPA,DC=nwow001,DC=corp,DC=ete,DC=cathaypacific,DC=com',
+      url: 'ldap://'+ldapHost+':'+ldapPort+'/cn='+systemUsername+','+systemDnSuffix,
       timeout: 5000,
       connectTimeout: 10000
     });
     try {
-      client.bind('OAuthTestUser1', 'OAuthTestUser1', function (error) {
+      client.bind(systemUsername, systemPassword, function (error) {
         if(error){
           console.log(error.message);
           client.unbind(function(error) {if(error){console.log(error.message);} else{console.log('client disconnected');}});
         } else {
           console.log('connected');
-          client.search('OU=IMT,OU=CLK,OU=HQ,OU=Users,OU=CPA,DC=nwow001,DC=corp,DC=ete,DC=cathaypacific,DC=com', opts, function(error, search) {
+          var opts = {
+            filter: '(cn='+username+')',
+            scope: 'sub',
+            attributes: ['dn']
+          };
+          client.search(loginDnSuffix, opts, function(error, search) {
             console.log('Searching.....');
 
             search.on('searchEntry', function(entry) {
