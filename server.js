@@ -107,9 +107,9 @@ app.get('/test', function (req, res) {
               client.unbind(function(error) {if(error){console.log('Unable to unbind: '+error.message);} else{console.log('client disconnected');}});
               res.send('Unable to search with loginUsername: '+loginUsername+' with error '+error.message);
             }else{
-              var loginUserDn=;
+              var loginUserDn=null;
               var loginUserDnCount=0;  
-              var searchErrorMessage;
+              var searchErrorMessage=null;
               search.on('searchEntry', function(entry) {
                 if(entry.object){
                   loginUserDnCount++;
