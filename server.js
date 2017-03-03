@@ -80,7 +80,7 @@ app.get('/test', function (req, res) {
     var ldapPort='389';
     var loginUsername='OAuthTestUser12';
     var loginPassword='OAuthTestUser1';
-    var loginDnSuffix='OU=IMT,OU=CLK,OU=HQ,OU=Users,OU=CPA,DC=nwow001,DC=corp,DC=ete,DC=cathaypacific,DC=com';
+    var loginBaseDn='OU=IMT,OU=CLK,OU=HQ,OU=Users,OU=CPA,DC=nwow001,DC=corp,DC=ete,DC=cathaypacific,DC=com';
 
     var client = ldap.createClient({
       url: 'ldap://'+ldapHost+':'+ldapPort+'/cn='+systemUsername+','+systemDnSuffix,
@@ -100,28 +100,47 @@ app.get('/test', function (req, res) {
             scope: 'sub',
             attributes: ['dn']
           };
-          client.search(loginDnSuffix, opts, function(error, search) {
+          client.search(loginBaseDn, opts, function(error, search) {
             console.log('Searching for '+loginUsername);
             if(error){
               console.log('Unable to search with loginUsername: '+loginUsername+' with error '+error.message);
               client.unbind(function(error) {if(error){console.log('Unable to unbind: '+error.message);} else{console.log('client disconnected');}});
               res.send('Unable to search with loginUsername: '+loginUsername+' with error '+error.message);
             }else{
-            
+              var loginUserDn=;
+              var loginUserDnCount=0;  
+              var searchErrorMessage;
               search.on('searchEntry', function(entry) {
                 if(entry.object){
+                  loginUserDnCount++;
+                  if (loginUserDnCount==1){
+                      loginUserDn=entry.object.dn;
+                  }
                   console.log('Found DN: ' + JSON.stringify(entry.object));
-                  res.send('Found DN: ' + JSON.stringify(entry.object));
+                  
                 }
               });
 
               search.on('error', function(error) {
-                console.error('error in searching with loginUsername: '+loginUsername+' with error ' + error.message);
-                res.send('error in searching with loginUsername: '+loginUsername+' with error ' + error.message);
+                searchErrorMessage='error in searching with loginUsername: '+loginUsername+' with error ' + error.message;
+                console.error(searchErrorMessage);
               });
 
               search.on('end', function(result) {
-                console.log('status: ' + result.status);
+                if (searchErrorMessage!=null){
+                  res.send('error in searching with loginUsername: '+loginUsername+' with error ' + error.message);
+                }else if(status!=0){
+                  console.error('error in searching with loginUsername: '+loginUsername+' with status' + status);
+                  res.send('error in searching with loginUsername: '+loginUsername+' with status' + status);
+                }else if(loginUserDnCount==0){
+                  console.log('error in searching with loginUsername: '+loginUsername+' with empty result');
+                  res.send('error in searching with loginUsername: '+loginUsername+' with empty result');
+                }else if (loginUserDnCount>1){
+                  console.log('error in searching with loginUsername: '+loginUsername+' with '+loginUserDnCount+' result');
+                  res.send('error in searching with loginUsername: '+loginUsername+' with '+loginUserDnCount+' result');
+                }else{
+                  res.send('Using DN: ' + loginUserDn);
+                }
                 client.unbind(function(error) {if(error){console.log('Unable to unbind: '+error.message);} else{console.log('client disconnected');}});
               });
             }
