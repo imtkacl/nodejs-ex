@@ -78,17 +78,28 @@ app.get('/test', function (req, res) {
     var systemDnSuffix='OU=IMT,OU=CLK,OU=HQ,OU=Users,OU=CPA,DC=nwow001,DC=corp,DC=ete,DC=cathaypacific,DC=com';
     var ldapHost='ADDS.ETE.CATHAYPACIFIC.COM';
     var ldapPort='389';
-    var loginUsername='OAuthTestUser12';
+    var loginUsername='OAuthTestUser1';
     var loginPassword='OAuthTestUser1';
     var loginBaseDn='OU=IMT,OU=CLK,OU=HQ,OU=Users,OU=CPA,DC=nwow001,DC=corp,DC=ete,DC=cathaypacific,DC=com';
 
+    if (req.body.username!=null){
+      loginUsername=req.body.username;
+    else if(req.headers.username!=null){
+      loginUsername=req.headers.username;
+    }
+    if (req.body.password!=null){
+      loginPassword=req.body.password;
+    }else if (req.headers.password!=null){
+      loginPassword=req.headers.password;
+    }
+    
     var client = ldap.createClient({
-      url: 'ldap://'+ldapHost+':'+ldapPort+'/cn='+systemUsername+','+systemDnSuffix,
+      url: 'ldap://'+ldapHost+':'+ldapPort,
       timeout: 5000,
       connectTimeout: 10000
     });
     try {
-      client.bind(systemUsername, systemPassword, function (error) {
+      client.bind('cn='+systemUsername+','+systemDnSuffix, systemPassword, function (error) {
         if(error){
           console.log('Unable to bind with systemUsername: '+systemUserName+' with error '+error.message);
           client.unbind(function(error) {if(error){console.log('Unable to unbind: '+error.message);} else{console.log('client disconnected');}});
