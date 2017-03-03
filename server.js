@@ -222,7 +222,7 @@ app.get('/test', function (req, res) {
 	var userSearchInfo = {
 		loginUsername: extractUsernameFromRequest(req),
 		loginPassword: extractPasswordFromRequest(req),
-		loginBaseDn: null;
+		loginBaseDn: null,
 		loginUserDnCount: 0,
 		loginUserDn: null,
 		errorMessage: null
