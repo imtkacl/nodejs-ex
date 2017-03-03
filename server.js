@@ -150,20 +150,20 @@ app.get('/test', function (req, res) {
                   console.error(searchErrorMessage);
                   res.send(searchErrorMessage);
                 }else{
-                  res.send('Binding using DN: ' + loginUserDn);
-                  var clientForLogin = ldap.createClient({
-                    url: 'ldap://'+ldapHost+':'+ldapPort,
-                    timeout: 5000,
-                    connectTimeout: 10000
-                  });
-                  clientForLogin.bind(loginUserDn, loginPassword, function (error) {
+                  console.log('Binding using DN: ' + loginUserDn);
+//                  var clientForLogin = ldap.createClient({
+//                    url: 'ldap://'+ldapHost+':'+ldapPort,
+//                    timeout: 5000,
+//                    connectTimeout: 10000
+//                  });
+                  client.bind(loginUserDn, loginPassword, function (error) {
                     if(error){
                       console.log('Unable to bind with DN: '+loginUserDn+' with error '+error.message);
-                      clientForLogin.unbind(function(error) {if(error){console.log('Unable to unbind: '+error.message);} else{console.log('client disconnected');}});
+                      client.unbind(function(error) {if(error){console.log('Unable to unbind: '+error.message);} else{console.log('client disconnected');}});
                       res.send('Unable to bind with DN: '+loginUserDn+' with error '+error.message);
                     } else {
                       console.log('Binded with DN: '+loginUserDn);
-                      clientForLogin.unbind(function(error) {if(error){console.log('Unable to unbind: '+error.message);} else{console.log('client disconnected');}});
+                      client.unbind(function(error) {if(error){console.log('Unable to unbind: '+error.message);} else{console.log('client disconnected');}});
                       res.send('Binded with DN: '+loginUserDn);
                     }
                   });
