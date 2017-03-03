@@ -134,7 +134,7 @@ function createOnLdapBindHandler(client, systemUsername, userSearchInfo, onUserV
 	}
 }
 
-function createOnLdapSearchHandler(client, serSearchInfo, onUserVerifySuccess, onUserVierfyFail) {
+function createOnLdapSearchHandler(client, userSearchInfo, onUserVerifySuccess, onUserVierfyFail) {
 	return function (error, search) {
 		console.log('Searching for ' + userSearchInfo.loginUsername);
 		if (error) {
