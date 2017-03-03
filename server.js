@@ -82,6 +82,19 @@ function unbindLdap(client){
   });
 }
 
+function createOnBindLoginUser(client, loginUserDn){
+	return function(error) {
+	  unbindLdap(client);
+	  if(error){
+		console.log('Unable to bind with DN: '+loginUserDn+' with error '+error.message);
+		res.send('Unable to bind with DN: '+loginUserDn+' with error '+error.message);
+	  } else {
+	  console.log('Binded with DN: '+loginUserDn);
+	  res.send('Binded with DN: '+loginUserDn);
+	}
+  }
+}
+
 app.get('/test', function (req, res) {
     var systemUsername='OAuthTestUser1';
     var systemPassword='OAuthTestUser1';
@@ -108,17 +121,8 @@ app.get('/test', function (req, res) {
       timeout: 5000,
       connectTimeout: 10000
     });
-    
-    function onBindLoginUser(error) {
-      unbindLdap(client);
-      if(error){
-        console.log('Unable to bind with DN: '+loginUserDn+' with error '+error.message);
-        res.send('Unable to bind with DN: '+loginUserDn+' with error '+error.message);
-      } else {
-        console.log('Binded with DN: '+loginUserDn);
-        res.send('Binded with DN: '+loginUserDn);
-      }
-    }
+
+
     try {
       client.bind('cn='+systemUsername+','+systemDnSuffix, systemPassword, function (error) {
         if(error){
@@ -177,7 +181,7 @@ app.get('/test', function (req, res) {
 //                    timeout: 5000,
 //                    connectTimeout: 10000
 //                  });
-                  client.bind(loginUserDn, loginPassword, onBindLoginUser);
+                  client.bind(loginUserDn, loginPassword, createOnBindLoginUser(client, loginUserDn));
                 }
               });
             }
