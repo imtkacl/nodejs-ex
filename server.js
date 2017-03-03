@@ -90,38 +90,39 @@ app.get('/test', function (req, res) {
     try {
       client.bind(systemUsername, systemPassword, function (error) {
         if(error){
-          console.log(error.message);
-          client.unbind(function(error) {if(error){console.log(error.message);} else{console.log('client disconnected');}});
+          console.log('Unable to bind with systemUsername: '+systemUserName+' with error '+error.message);
+          client.unbind(function(error) {if(error){console.log('Unable to unbind: '+error.message);} else{console.log('client disconnected');}});
+          res.send('Unable to bind with systemUsername: '+systemUserName+' with error '+error.message);
         } else {
           console.log('connected');
           var opts = {
-            filter: '(cn='+username+')',
+            filter: '(cn='+loginUsername+')',
             scope: 'sub',
             attributes: ['dn']
           };
           client.search(loginDnSuffix, opts, function(error, search) {
-            console.log('Searching.....');
+            console.log('Searching for '+loginUsername);
 
             search.on('searchEntry', function(entry) {
               if(entry.object){
-                console.log('entry: %j ' + JSON.stringify(entry.object));
-                res.send('entry: %j ' + JSON.stringify(entry.object));
+                console.log('Found DN: ' + JSON.stringify(entry.object));
+                client.unbind(function(error) {if(error){console.log('Unable to unbind: '+error.message);} else{console.log('client disconnected');}});
+                res.send('Found DN: ' + JSON.stringify(entry.object));
               }
             });
 
             search.on('error', function(error) {
-              console.error('error in searching: ' + error.message);
-              res.send('error in searching: ' + error.message);
+              console.error('error in searching with loginUsername: '+loginUsername+' with error ' + error.message);
+              client.unbind(function(error) {if(error){console.log('Unable to unbind: '+error.message);} else{console.log('client disconnected');}});
+              res.send('error in searching with loginUsername: '+loginUsername+' with error ' + error.message);
             });
 
-            client.unbind(function(error) {if(error){console.log(error.message);} else{console.log('client disconnected');}});
           });
-          client.unbind(function(error) {if(error){console.log(error.message);} else{console.log('client disconnected');}});
         }
       });
     } catch(error){
       console.log(error);
-      client.unbind(function(error) {if(error){console.log(error.message);} else{console.log('client disconnected');}});
+      client.unbind(function(error) {if(error){console.log('Unable to unbind: '+error.message);} else{console.log('client disconnected');}});
       res.send('error in binding: ' + error.message);
     }
     
