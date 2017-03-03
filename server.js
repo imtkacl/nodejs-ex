@@ -129,9 +129,9 @@ app.get('/test', function (req, res) {
               search.on('end', function(result) {
                 if (searchErrorMessage!=null){
                   res.send('error in searching with loginUsername: '+loginUsername+' with error ' + error.message);
-                }else if(status!=0){
-                  console.error('error in searching with loginUsername: '+loginUsername+' with status' + status);
-                  res.send('error in searching with loginUsername: '+loginUsername+' with status' + status);
+                }else if(result.status!=0){
+                  console.error('error in searching with loginUsername: '+loginUsername+' with status' + result.status);
+                  res.send('error in searching with loginUsername: '+loginUsername+' with status' + result.status);
                 }else if(loginUserDnCount==0){
                   console.log('error in searching with loginUsername: '+loginUsername+' with empty result');
                   res.send('error in searching with loginUsername: '+loginUsername+' with empty result');
