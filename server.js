@@ -108,7 +108,7 @@ app.get('/test', function (req, res) {
               res.send('Unable to search with loginUsername: '+loginUsername+' with error '+error.message);
             }else{
               var loginUserDn=null;
-              var loginUserDnCount=0;  
+              var loginUserDnCount=0; 
               var searchErrorMessage=null;
               search.on('searchEntry', function(entry) {
                 if(entry.object){
