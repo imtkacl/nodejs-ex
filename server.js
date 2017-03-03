@@ -78,7 +78,7 @@ app.get('/test', function (req, res) {
     var systemDnSuffix='OU=IMT,OU=CLK,OU=HQ,OU=Users,OU=CPA,DC=nwow001,DC=corp,DC=ete,DC=cathaypacific,DC=com';
     var ldapHost='ADDS.ETE.CATHAYPACIFIC.COM';
     var ldapPort='389';
-    var loginUsername='OAuthTestUser1';
+    var loginUsername='OAuthTestUser12';
     var loginPassword='OAuthTestUser1';
     var loginDnSuffix='OU=IMT,OU=CLK,OU=HQ,OU=Users,OU=CPA,DC=nwow001,DC=corp,DC=ete,DC=cathaypacific,DC=com';
 
