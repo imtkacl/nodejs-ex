@@ -145,20 +145,25 @@ app.get('/test', function (req, res) {
                 }else if (loginUserDnCount>1){
                   searchErrorMessage='error in searching with loginUsername: '+loginUsername+' with '+loginUserDnCount+' result';
                 }
+                client.unbind(function(error) {if(error){console.log('Unable to unbind: '+error.message);} else{console.log('client disconnected');}});
                 if (searchErrorMessage!=null){
                   console.error(searchErrorMessage);
-                  client.unbind(function(error) {if(error){console.log('Unable to unbind: '+error.message);} else{console.log('client disconnected');}});
                   res.send(searchErrorMessage);
                 }else{
                   res.send('Binding using DN: ' + loginUserDn);
-                  client.bind(loginUserDn, loginPassword, function (error) {
+                  var clientForLogin = ldap.createClient({
+                    url: 'ldap://'+ldapHost+':'+ldapPort,
+                    timeout: 5000,
+                    connectTimeout: 10000
+                  });
+                  clientForLogin.bind(loginUserDn, loginPassword, function (error) {
                     if(error){
                       console.log('Unable to bind with DN: '+loginUserDn+' with error '+error.message);
-                      client.unbind(function(error) {if(error){console.log('Unable to unbind: '+error.message);} else{console.log('client disconnected');}});
+                      clientForLogin.unbind(function(error) {if(error){console.log('Unable to unbind: '+error.message);} else{console.log('client disconnected');}});
                       res.send('Unable to bind with DN: '+loginUserDn+' with error '+error.message);
                     } else {
                       console.log('Binded with DN: '+loginUserDn);
-                      client.unbind(function(error) {if(error){console.log('Unable to unbind: '+error.message);} else{console.log('client disconnected');}});
+                      clientForLogin.unbind(function(error) {if(error){console.log('Unable to unbind: '+error.message);} else{console.log('client disconnected');}});
                       res.send('Binded with DN: '+loginUserDn);
                     }
                   });
