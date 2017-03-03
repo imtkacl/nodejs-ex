@@ -117,11 +117,10 @@ function unbindLdap(client) {
 	});
 }
 
-function createOnLdapBindHandler(client, res, systemUsername, userSearchInfo, onUserVerifySuccess, onUserVierfyFail) {
+function createOnLdapBindHandler(client, systemUsername, userSearchInfo, onUserVerifySuccess, onUserVierfyFail) {
 	return function (error) {
 		if (error) {
 			console.log('Unable to bind with systemUsername: ' + systemUsername + ' with error ' + error.message);
-			unbindLdap(clietn);
 			onUserVierfyFail('Unable to bind with systemUsername: ' + systemUsername + ' with error ' + error.message, userSearchInfo);
 		} else {
 			console.log('connected');
@@ -130,23 +129,22 @@ function createOnLdapBindHandler(client, res, systemUsername, userSearchInfo, on
 				scope: 'sub',
 				attributes: ['dn']
 			};
-			client.search(userSearchInfo.loginBaseDn, opts, createOnLdapSearchHandler(client, res, userSearchInfo, onUserVerifySuccess, onUserVierfyFail));
+			client.search(userSearchInfo.loginBaseDn, opts, createOnLdapSearchHandler(client, userSearchInfo, onUserVerifySuccess, onUserVierfyFail));
 		}
 	}
 }
 
-function createOnLdapSearchHandler(client, res, userSearchInfo, onUserVerifySuccess, onUserVierfyFail) {
+function createOnLdapSearchHandler(client, serSearchInfo, onUserVerifySuccess, onUserVierfyFail) {
 	return function (error, search) {
 		console.log('Searching for ' + userSearchInfo.loginUsername);
 		if (error) {
 			userSearchInfo.errorMessage = 'Unable to search with loginUsername: ' + userSearchInfo.loginUsername + ' with error ' + error.message;
 			console.log(userSearchInfo.errorMessage);
-			unbindLdap(client);
 			onUserVierfyFail(userSearchInfo.errorMessage, userSearchInfo);
 		} else {
 			search.on('searchEntry', createOnLdapSearchEntryHandler(userSearchInfo));
 			search.on('error', createOnLdapSearchErrorHandler(userSearchInfo));
-			search.on('end', createOnLdapSearchEndHandler(client, res, userSearchInfo, onUserVerifySuccess, onUserVierfyFail));
+			search.on('end', createOnLdapSearchEndHandler(client, userSearchInfo, onUserVerifySuccess, onUserVierfyFail));
 		}
 	}
 }
@@ -163,14 +161,13 @@ function createOnLdapSearchEntryHandler(userSearchInfo) {
 	}
 }
 
-function createOnLdapSearchEndHandler(client, res, userSearchInfo, onUserVerifySuccess, onUserVierfyFail) {
+function createOnLdapSearchEndHandler(client, userSearchInfo, onUserVerifySuccess, onUserVierfyFail) {
 	return function (result) {
 		if (!assertUserSearchInfoError(userSearchInfo, result)) {
-			unbindLdap(client);
 			onUserVierfyFail(userSearchInfo.errorMessage, userSearchInfo);
 		} else {
 			console.log('Binding using DN: ' + userSearchInfo.loginUserDn);
-			client.bind(userSearchInfo.loginUserDn, userSearchInfo.loginPassword, createOnBindLoginUserHandler(client, res, userSearchInfo, onUserVerifySuccess, onUserVierfyFail));
+			client.bind(userSearchInfo.loginUserDn, userSearchInfo.loginPassword, createOnBindLoginUserHandler(userSearchInfo, onUserVerifySuccess, onUserVierfyFail));
 		}
 	}
 }
@@ -198,9 +195,8 @@ function createOnLdapSearchErrorHandler(userSearchInfo) {
 	}
 }
 
-function createOnBindLoginUserHandler(client, res, userSearchInfo, onUserVerifySuccess, onUserVierfyFail) {
+function createOnBindLoginUserHandler(userSearchInfo, onUserVerifySuccess, onUserVierfyFail) {
 	return function (error) {
-		unbindLdap(client);
 		if (error) {
 			console.log('Unable to bind with DN: ' + userSearchInfo.loginUserDn + ' with error ' + error.message);
 			onUserVerifySuccess('Unable to bind with DN: ' + userSearchInfo.loginUserDn + ' with error ' + error.message, userSearchInfo);
@@ -227,7 +223,21 @@ function createOnUserVerifyFailHandler(res) {
 	}
 }
 
-function verifyLdapUser(res, loginUsername, loginPassword, onUserVerifySuccess, onUserVerifyFail) {
+function createOnLdapUserVerifySuccessHandler(client, onUserVerifySuccessHandler) {
+	return function (msg, userSearchInfo) {
+		unbindLdap(client);
+		onUserVerifySuccessHandler(msg, userSearchInfo);
+	}
+}
+
+function createOnLdapUserVerifyFailHandler(client, createOnUserVerifyFailHandler) {
+	return function (msg, userSearchInfo) {
+		unbindLdap(client);
+		createOnUserVerifyFailHandler(msg, userSearchInfo);
+	}
+}
+
+function verifyLdapUser(loginUsername, loginPassword, onUserVerifySuccess, onUserVerifyFail) {
 	var systemUsername = 'OAuthTestUser1';
 	var systemPassword = 'OAuthTestUser1';
 	var systemDnSuffix = 'OU=IMT,OU=CLK,OU=HQ,OU=Users,OU=CPA,DC=nwow001,DC=corp,DC=ete,DC=cathaypacific,DC=com';
@@ -256,14 +266,19 @@ function verifyLdapUser(res, loginUsername, loginPassword, onUserVerifySuccess, 
 			timeout: 5000,
 			connectTimeout: 10000
 		});
-
+	var onLdapUserVerifySuccess=createOnLdapUserVerifySuccessHandler(client, onUserVerifySuccess);
+	var onLdapUserVerifyFail=createOnLdapUserVerifyFailHandler(client, onUserVerifyFail);
 	try {
 		client.bind('cn=' + systemUsername + ',' + systemDnSuffix, systemPassword,
-			createOnLdapBindHandler(client, res, systemUsername, userSearchInfo, onUserVerifySuccess, onUserVerifyFail));
+			createOnLdapBindHandler(
+				client,
+				systemUsername,
+				userSearchInfo,
+				onLdapUserVerifySuccess,
+				onLdapUserVerifyFail));
 	} catch (error) {
 		console.log(error);
-		unbindLdap(client);
-		onUserVerifyFail('error in binding: ' + error.message, userSearchInfo);
+		onLdapUserVerifyFail('error in binding: ' + error.message, userSearchInfo);
 	}
 	return userSearchInfo.verified;
 }
