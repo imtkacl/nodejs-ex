@@ -117,12 +117,12 @@ function unbindLdap(client) {
 	});
 }
 
-function createOnLdapBindHandler(client, res, systemUserName, userSearchInfo) {
+function createOnLdapBindHandler(client, res, systemUsername, userSearchInfo) {
 	return function (error) {
 		if (error) {
-			console.log('Unable to bind with systemUsername: ' + systemUserName + ' with error ' + error.message);
+			console.log('Unable to bind with systemUsername: ' + systemUsername + ' with error ' + error.message);
 			unbindLdap(clietn);
-			res.send('Unable to bind with systemUsername: ' + systemUserName + ' with error ' + error.message);
+			res.send('Unable to bind with systemUsername: ' + systemUsername + ' with error ' + error.message);
 		} else {
 			console.log('connected');
 			var opts = {
@@ -242,7 +242,7 @@ app.get('/test', function (req, res) {
 
 	try {
 		client.bind('cn=' + systemUsername + ',' + systemDnSuffix, systemPassword,
-			createOnLdapBindHandler(client, res, systemUserName, userSearchInfo));
+			createOnLdapBindHandler(client, res, systemUsername, userSearchInfo));
 	} catch (error) {
 		console.log(error);
 		unbindLdap(client);
