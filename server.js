@@ -282,7 +282,7 @@ function verifyLdapUser(loginUsername, loginPassword, onUserVerifySuccess, onUse
 	}
 }
 
-app.get('/test', function (req, res) {
+app.get('/verifyLdap', function (req, res) {
 	verifyLdapUser(
 			extractUsernameFromRequest(req),
 			extractPasswordFromRequest(req),
