@@ -30,27 +30,56 @@ app.get('/', function (req, res) {
 
 });
 
-app.get('/pagecount', function (req, res) {
-	// try to initialize the db on every request if it's not already
-	// initialized.
-	console.log(req.headers)
-
-	//res.send('{ pageCount: 0 }');
-	res.send(req.headers);
-
-});
-
-app.post('/oauth2/token', function (req, res) {
-
-	// try to initialize the db on every request if it's not already
-	// initialized.
-
+app.post('/dumpRequest', function (req, res) {
 	var out = {
 		"header": req.headers,
 		"param": req.query,
 		"body": req.body
 	};
 	res.send(out);
+}
+
+app.get('/pagecount', function (req, res) {
+	// try to initialize the db on every request if it's not already
+	// initialized.
+	console.log(req.headers)
+
+	res.send('{ pageCount: 0 }');
+	//res.send(req.headers);
+
+});
+
+app.post('/oauth2/token', function (req, res) {
+
+	var options = {
+		url: 'http://kong-proxy.apigw-d0.svc.cluster.local:8000/pagecount/oauth2/token',
+		method: 'POST',
+		headers: {
+			x-forwarded-proto: 'https'
+		},
+		formData: {
+			grant_type: "password",
+			client_id: "DummyApp",
+			client_secret: "d9b779ac11594204afc36a324c237803",
+			provision_key: "fc2502bb56724b9b8e824ba691f3c8b9",
+			authenticated_userid: "dummy"
+		}
+	};
+	
+	request(options, function (error, response, body) {
+		console.log('error: ' + error.stack);
+		console.log('response: ' + response);
+		console.log('body: ' + body);
+		if (error) {
+			res.status(500).send(error);
+		} else if (response.statusCode == 200) {
+			res.status(response.statusCode).send(body);
+		} else {
+			res.status(response.statusCode).send(body);
+		}
+
+	});
+	
 });
 
 app.get('/testBackEnd/', function (req, res) {
