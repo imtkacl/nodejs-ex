@@ -67,7 +67,7 @@ app.post('/oauth2/token', function (req, res) {
 	};
 	
 	request(options, function (error, response, body) {
-		console.log('error: ' + error.stack);
+		console.log('error: ' + JSON.stringify(error));
 		console.log('response: ' + response);
 		console.log('body: ' + body);
 		if (error) {
