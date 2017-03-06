@@ -285,7 +285,6 @@ function verifyLdapUser(loginUsername, loginPassword, onUserVerifySuccess, onUse
 
 app.get('/test', function (req, res) {
 	var userVerified = verifyLdapUser(
-			res,
 			extractUsernameFromRequest(req),
 			extractPasswordFromRequest(req),
 			createOnUserVerifySuccessHandler(res),
