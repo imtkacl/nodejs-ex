@@ -55,7 +55,7 @@ app.post('/oauth2/token', function (req, res) {
 		url: 'http://kong-proxy.apigw-d0.svc.cluster.local:8000/pagecount/oauth2/token',
 		method: 'POST',
 		headers: {
-			x-forwarded-proto: 'https'
+			'x-forwarded-proto': 'https'
 		},
 		formData: {
 			grant_type: "password",
