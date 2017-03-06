@@ -37,12 +37,12 @@ app.post('/dumpRequest', function (req, res) {
 		"body": req.body
 	};
 	res.send(out);
-}
+});
 
 app.get('/pagecount', function (req, res) {
 	// try to initialize the db on every request if it's not already
 	// initialized.
-	console.log(req.headers)
+	console.log(req.headers);
 
 	res.send('{ pageCount: 0 }');
 	//res.send(req.headers);
