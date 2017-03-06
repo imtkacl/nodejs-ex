@@ -49,8 +49,7 @@ app.get('/pagecount', function (req, res) {
 
 });
 
-app.post('/oauth2/token', function (req, res) {
-
+function getAccessToken(res, client_secret, userid) {
 	var options = {
 		url: 'http://kong-proxy.apigw-d0.svc.cluster.local:8000/pagecount/oauth2/token',
 		method: 'POST',
@@ -60,15 +59,15 @@ app.post('/oauth2/token', function (req, res) {
 		formData: {
 			grant_type: "password",
 			client_id: "DummyApp",
-			client_secret: "d9b779ac11594204afc36a324c237803",
+			client_secret: client_secret,
 			provision_key: "fc2502bb56724b9b8e824ba691f3c8b9",
-			authenticated_userid: "dummy"
+			authenticated_userid: userid
 		}
 	};
-	
+
 	request(options, function (error, response, body) {
 		console.log('error: ' + JSON.stringify(error));
-		console.log('response: ' + response);
+		console.log('response: ' + JSON.stringify(response));
 		console.log('body: ' + body);
 		if (error) {
 			res.status(500).send(error);
@@ -79,7 +78,29 @@ app.post('/oauth2/token', function (req, res) {
 		}
 
 	});
-	
+}
+
+
+function createGetAccessTokenHandler(res, clientSecret, userid) {
+	return function (msg, userSearchInfo) {
+		userSearchInfo.verfied = true;
+		console.log('Verified Success');
+		getAccessToken(res, clientSecret, userid);
+	}
+}
+
+app.post('/oauth2/token', function (req, res) {
+	var userid=extractUsernameFromRequest(req);
+	var clientSecret=extractClientSecretFromRequest(req);
+	verifyLdapUser(
+		userid,
+		extractPasswordFromRequest(req),
+		createGetAccessTokenHandler(res, clientSecret, userid),
+		createOnUserVerifyFailHandler(res));
+});
+
+app.post('/testOAuth2', function (req, res) {
+	getAccessToken(res, "d9b779ac11594204afc36a324c237803", "dummy");
 });
 
 app.get('/testBackEnd/', function (req, res) {
@@ -126,6 +147,18 @@ function extractPasswordFromRequest(req) {
 	}
 	return loginPassword;
 }
+
+
+function extractClientSecretFromRequest(req) {
+	var clientSecret = null;
+	if (req.body.client_secret != null) {
+		clientSecret = req.body.client_secret;
+	} else if (req.headers.client_secret != null) {
+		clientSecret = req.headers.client_secret;
+	}
+	return clientSecret;
+}
+
 
 function assertUsernamePassword(userSearchInfo) {
 	if (userSearchInfo.loginUsername == null || userSearchInfo.loginPassword == null) {
@@ -295,8 +328,8 @@ function verifyLdapUser(loginUsername, loginPassword, onUserVerifySuccess, onUse
 			timeout: 5000,
 			connectTimeout: 10000
 		});
-	var onLdapUserVerifySuccess=createOnLdapUserVerifySuccessHandler(client, onUserVerifySuccess);
-	var onLdapUserVerifyFail=createOnLdapUserVerifyFailHandler(client, onUserVerifyFail);
+	var onLdapUserVerifySuccess = createOnLdapUserVerifySuccessHandler(client, onUserVerifySuccess);
+	var onLdapUserVerifyFail = createOnLdapUserVerifyFailHandler(client, onUserVerifyFail);
 	try {
 		client.bind('cn=' + systemUsername + ',' + systemDnSuffix, systemPassword,
 			createOnLdapBindHandler(
@@ -313,10 +346,10 @@ function verifyLdapUser(loginUsername, loginPassword, onUserVerifySuccess, onUse
 
 app.get('/verifyLdap', function (req, res) {
 	verifyLdapUser(
-			extractUsernameFromRequest(req),
-			extractPasswordFromRequest(req),
-			createOnUserVerifySuccessHandler(res),
-			createOnUserVerifyFailHandler(res));
+		extractUsernameFromRequest(req),
+		extractPasswordFromRequest(req),
+		createOnUserVerifySuccessHandler(res),
+		createOnUserVerifyFailHandler(res));
 
 });
 
