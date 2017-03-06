@@ -49,7 +49,7 @@ app.get('/pagecount', function (req, res) {
 
 });
 
-function getAccessToken(res, client_secret, userid) {
+function getAccessToken(res, clientSecret, userid) {
 	var options = {
 		url: 'http://kong-proxy.apigw-d0.svc.cluster.local:8000/pagecount/oauth2/token',
 		method: 'POST',
@@ -59,7 +59,7 @@ function getAccessToken(res, client_secret, userid) {
 		formData: {
 			grant_type: "password",
 			client_id: "DummyApp",
-			client_secret: client_secret,
+			client_secret: clientSecret,
 			provision_key: "fc2502bb56724b9b8e824ba691f3c8b9",
 			authenticated_userid: userid
 		}
@@ -191,7 +191,7 @@ function createOnLdapBindHandler(client, systemUsername, userSearchInfo, onUserV
 				scope: 'sub',
 				attributes: ['dn']
 			};
-			client.search(userSearchInfo.loginBaseDn, opts, createOnLdapSearchHandler(client, userSearchInfo, onUserVerifySuccess, onUserVierfyFai));
+			client.search(userSearchInfo.loginBaseDn, opts, createOnLdapSearchHandler(client, userSearchInfo, onUserVerifySuccess, onUserVierfyFail));
 		}
 	}
 }
