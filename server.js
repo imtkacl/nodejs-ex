@@ -129,7 +129,7 @@ function createOnLdapBindHandler(client, systemUsername, userSearchInfo, onUserV
 				scope: 'sub',
 				attributes: ['dn']
 			};
-			client.search(userSearchInfo.loginBaseDn, opts, createOnLdapSearchHandler(client, userSearchInfo, onUserVerifySuccess, onUserVierfyFail));
+			client.search(userSearchInfo.loginBaseDn, opts, createOnLdapSearchHandler(client, userSearchInfo, onUserVerifySuccess, onUserVierfyFai));
 		}
 	}
 }
@@ -199,10 +199,10 @@ function createOnBindLoginUserHandler(userSearchInfo, onUserVerifySuccess, onUse
 	return function (error) {
 		if (error) {
 			console.log('Unable to bind with DN: ' + userSearchInfo.loginUserDn + ' with error ' + error.message);
-			onUserVerifySuccess('Unable to bind with DN: ' + userSearchInfo.loginUserDn + ' with error ' + error.message, userSearchInfo);
+			onUserVierfyFail('Unable to bind with DN: ' + userSearchInfo.loginUserDn + ' with error ' + error.message, userSearchInfo);
 		} else {
 			console.log('Binded with DN: ' + userSearchInfo.loginUserDn);
-			onUserVierfyFail('Binded with DN: ' + userSearchInfo.loginUserDn, userSearchInfo);
+			onUserVerifySuccess('Binded with DN: ' + userSearchInfo.loginUserDn, userSearchInfo);
 		}
 	}
 }
@@ -258,7 +258,7 @@ function verifyLdapUser(loginUsername, loginPassword, onUserVerifySuccess, onUse
 
 	if (!assertUsernamePassword(userSearchInfo)) {
 		onUserVerifyFail(userSearchInfo.errorMessage, userSearchInfo);
-		return userSearchInfo.verified;
+		return;
 	}
 
 	var client = ldap.createClient({
@@ -280,17 +280,15 @@ function verifyLdapUser(loginUsername, loginPassword, onUserVerifySuccess, onUse
 		console.log(error);
 		onLdapUserVerifyFail('error in binding: ' + error.message, userSearchInfo);
 	}
-	return userSearchInfo.verified;
 }
 
 app.get('/test', function (req, res) {
-	var userVerified = verifyLdapUser(
+	verifyLdapUser(
 			extractUsernameFromRequest(req),
 			extractPasswordFromRequest(req),
 			createOnUserVerifySuccessHandler(res),
 			createOnUserVerifyFailHandler(res));
 
-	console.log('userVerified:' + userVerified);
 });
 
 // error handling
