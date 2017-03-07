@@ -164,9 +164,9 @@ function extractClientSecretFromRequest(req) {
 
 function extractParameterFromRequest(req, parameterName) {
 	var clientSecret = null;
-	if (req.body[parameterName] != null) {
+	if (req.body.hasOwnProperty(parameterName) != null) {
 		clientSecret = req.body[parameterName];
-	} else if (req.headers[parameterName] != null) {
+	} else if (req.headers.hasOwnProperty(parameterName) != null) {
 		clientSecret = req.headers[parameterName];
 	}
 	return clientSecret;
