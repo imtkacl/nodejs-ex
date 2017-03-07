@@ -167,8 +167,8 @@ function extractParameterFromRequest(req, parameterName) {
 	var a={
 		b: 'c'
 	};
-	console.log(a[b]);
-	console.log(a[c]);
+	console.log(a['b']);
+	console.log(a['c']);
 	var value=req.body[parameterName];
 	console.log(value);
 	if ( value != null) {
