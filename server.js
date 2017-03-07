@@ -57,8 +57,8 @@ function getAccessToken(res, grantType, clientId, clientSecret, userid) {
 			'x-forwarded-proto': 'https'
 		},
 		formData: {
-			grant_type: "password",
-			client_id: "DummyApp",
+			grant_type: grantType,
+			client_id: clientId,
 			client_secret: clientSecret,
 			provision_key: "fc2502bb56724b9b8e824ba691f3c8b9",
 			authenticated_userid: userid
@@ -80,11 +80,11 @@ function getAccessToken(res, grantType, clientId, clientSecret, userid) {
 	});
 }
 
-function createGetAccessTokenHandler(res, clientSecret, userid) {
+function createGetAccessTokenHandler(res, grantType, clientId, clientSecret, userid) {
 	return function (msg, userSearchInfo) {
 		userSearchInfo.verfied = true;
 		console.log('Verified Success');
-		getAccessToken(res, clientSecret, userid);
+		getAccessToken(res, grantType, clientId, clientSecret, userid);
 	}
 }
 
@@ -96,8 +96,8 @@ app.post('/oauth2/token', function (req, res) {
 		extractPasswordFromRequest(req),
 		createGetAccessTokenHandler(
 			res,
-			extractParameterFromRequest(res, 'grant_type'),
-			extractParameterFromRequest(res, 'client_id'),
+			extractParameterFromRequest(req, 'grant_type'),
+			extractParameterFromRequest(req, 'client_id'),
 			clientSecret,
 			userid),
 		createOnUserVerifyFailHandler(res));
@@ -163,17 +163,13 @@ function extractClientSecretFromRequest(req) {
 }
 
 function extractParameterFromRequest(req, parameterName) {
-	var clientSecret = null;
-	console.log('req.body:'+req.body);
-	console.log('req.headers:'+req.headers);
-	var value=req.body[parameterName];
-	console.log(value);
-	if ( value != null) {
-		clientSecret = req.body[parameterName];
-	} else if (req.headers[parameterName]) {
-		clientSecret = req.headers[parameterName];
+	var parameterValue = null;
+	if (req.body[parameterName] != null) {
+		parameterValue = req.body[parameterName];
+	} else if (req.headers[parameterName] != null) {
+		parameterValue = req.headers[parameterName];
 	}
-	return clientSecret;
+	return parameterValue;
 }
 
 function assertUsernamePassword(userSearchInfo) {
