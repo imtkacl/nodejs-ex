@@ -49,7 +49,7 @@ app.get('/pagecount', function (req, res) {
 
 });
 
-function getAccessToken(res, clientSecret, userid) {
+function getAccessToken(res, grantType, clientId, clientSecret, userid) {
 	var options = {
 		url: 'http://kong-proxy.apigw-d0.svc.cluster.local:8000/pagecount/oauth2/token',
 		method: 'POST',
@@ -80,7 +80,6 @@ function getAccessToken(res, clientSecret, userid) {
 	});
 }
 
-
 function createGetAccessTokenHandler(res, clientSecret, userid) {
 	return function (msg, userSearchInfo) {
 		userSearchInfo.verfied = true;
@@ -90,17 +89,22 @@ function createGetAccessTokenHandler(res, clientSecret, userid) {
 }
 
 app.post('/oauth2/token', function (req, res) {
-	var userid=extractUsernameFromRequest(req);
-	var clientSecret=extractClientSecretFromRequest(req);
+	var userid = extractUsernameFromRequest(req);
+	var clientSecret = extractClientSecretFromRequest(req);
 	verifyLdapUser(
 		userid,
 		extractPasswordFromRequest(req),
-		createGetAccessTokenHandler(res, clientSecret, userid),
+		createGetAccessTokenHandler(
+			res,
+			extractParameterFromRequest(res, 'grant_type'),
+			extractParameterFromRequest(res, 'client_id'),
+			clientSecret,
+			userid),
 		createOnUserVerifyFailHandler(res));
 });
 
 app.post('/testOAuth2', function (req, res) {
-	getAccessToken(res, "d9b779ac11594204afc36a324c237803", "dummy");
+	getAccessToken(res, "password", "DummyApp", "d9b779ac11594204afc36a324c237803", "dummy");
 });
 
 app.get('/testBackEnd/', function (req, res) {
@@ -148,7 +152,6 @@ function extractPasswordFromRequest(req) {
 	return loginPassword;
 }
 
-
 function extractClientSecretFromRequest(req) {
 	var clientSecret = null;
 	if (req.body.client_secret != null) {
@@ -159,6 +162,15 @@ function extractClientSecretFromRequest(req) {
 	return clientSecret;
 }
 
+function extractParameterFromRequest(req, parameterName) {
+	var clientSecret = null;
+	if (req.body[parameterName] != null) {
+		clientSecret = req.body[parameterName];
+	} else if (req.headers[parameterName] != null) {
+		clientSecret = req.headers[parameterName];
+	}
+	return clientSecret;
+}
 
 function assertUsernamePassword(userSearchInfo) {
 	if (userSearchInfo.loginUsername == null || userSearchInfo.loginPassword == null) {
