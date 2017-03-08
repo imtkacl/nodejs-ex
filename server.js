@@ -42,15 +42,15 @@ app.post('/dumpRequest', function (req, res) {
 app.get('/pagecount', function (req, res) {
 	// try to initialize the db on every request if it's not already
 	// initialized.
-	console.log(req.headers);
-	var responseCode=extractParameterFromRequest(req, 'x-custom-rsp-code'),
-	var responseBody=extractParameterFromRequest(req, 'x-custom-rsp-body'),
+	var responseCode=extractParameterFromRequest(req, 'x-custom-rsp-code');
+	var responseBody=extractParameterFromRequest(req, 'x-custom-rsp-body');
 	if (responseCode==null){
 		responseCode=200;
 	}
 	if (responseBody==null){
 		responseBody='{ pageCount: 0 }'
 	}
+	console.log(req.headers);
 	res.status(responseCode).send(responseBody);
 	//res.send(req.headers);
 
