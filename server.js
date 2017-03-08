@@ -43,8 +43,15 @@ app.get('/pagecount', function (req, res) {
 	// try to initialize the db on every request if it's not already
 	// initialized.
 	console.log(req.headers);
-
-	res.send('{ pageCount: 0 }');
+	var responseCode=extractParameterFromRequest(req, 'x-custom-rsp-code'),
+	var responseBody=extractParameterFromRequest(req, 'x-custom-rsp-body'),
+	if (responseCode==null){
+		responseCode=200;
+	}
+	if (responseBody==null){
+		responseBody='{ pageCount: 0 }'
+	}
+	res.status(responseCode).send(responseBody);
 	//res.send(req.headers);
 
 });
@@ -88,19 +95,26 @@ function createGetAccessTokenHandler(res, grantType, clientId, clientSecret, use
 	}
 }
 
+function createOAuthAuthFailHandler(res) {
+	return function (msg, userSearchInfo) {
+		userSearchInfo.verfied = false;
+		console.log('OAuth Verified Fail: '+msg);
+		res.status(400).send('{ "error":"invalid_grant" }');
+	}
+}
+
 app.post('/oauth2/token', function (req, res) {
-	var userid = extractUsernameFromRequest(req);
-	var clientSecret = extractClientSecretFromRequest(req);
+	var userid = extractParameterFromRequest(req, 'username');
 	verifyLdapUser(
 		userid,
-		extractPasswordFromRequest(req),
+		extractParameterFromRequest(req, 'password'),
 		createGetAccessTokenHandler(
 			res,
 			extractParameterFromRequest(req, 'grant_type'),
 			extractParameterFromRequest(req, 'client_id'),
-			clientSecret,
+			extractParameterFromRequest(req, 'client_secret'),
 			userid),
-		createOnUserVerifyFailHandler(res));
+		createOAuthAuthFailHandler(res));
 });
 
 app.post('/testOAuth2', function (req, res) {
@@ -132,35 +146,6 @@ app.get('/testBackEnd/', function (req, res) {
 
 	});
 });
-function extractUsernameFromRequest(req) {
-	var loginUsername = null;
-	if (req.body.username != null) {
-		loginUsername = req.body.username;
-	} else if (req.headers.username != null) {
-		loginUsername = req.headers.username;
-	}
-	return loginUsername;
-}
-
-function extractPasswordFromRequest(req) {
-	var loginPassword = null;
-	if (req.body.password != null) {
-		loginPassword = req.body.password;
-	} else if (req.headers.password != null) {
-		loginPassword = req.headers.password;
-	}
-	return loginPassword;
-}
-
-function extractClientSecretFromRequest(req) {
-	var clientSecret = null;
-	if (req.body.client_secret != null) {
-		clientSecret = req.body.client_secret;
-	} else if (req.headers.client_secret != null) {
-		clientSecret = req.headers.client_secret;
-	}
-	return clientSecret;
-}
 
 function extractParameterFromRequest(req, parameterName) {
 	var parameterValue = null;
@@ -358,8 +343,8 @@ function verifyLdapUser(loginUsername, loginPassword, onUserVerifySuccess, onUse
 
 app.get('/verifyLdap', function (req, res) {
 	verifyLdapUser(
-		extractUsernameFromRequest(req),
-		extractPasswordFromRequest(req),
+		extractParameterFromRequest(req, 'username'),
+		extractParameterFromRequest(req, 'password'),
 		createOnUserVerifySuccessHandler(res),
 		createOnUserVerifyFailHandler(res));
 
