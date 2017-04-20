@@ -381,27 +381,27 @@ console.log('oauth2TokenTestClientSecret: '+oauth2TokenTestClientSecret);
 console.log('oauth2TokenTestUserId: '+oauth2TokenTestUserId);
 console.log('oauth2TestBackEnd: '+oauth2TestBackEnd);
 
-if (isNaN(oauth2TokenTestClientId)){
+if (typeof oauth2TokenTestClientId === 'undefined'){
 	console.log('Environment variable OAUTH2_TEST_CLIENT_ID is not set. /testOAuth2 will not work')
 }
-if (isNaN(oauth2TokenTestClientSecret)){
+if (typeof oauth2TokenTestClientSecret === 'undefined'){
 	console.log('Environment variable OAUTH2_TEST_CLIENT_SECRET is not set. /testOAuth2 will not work')
 }
-if (isNaN(oauth2TokenTestUserId)){
+if (typeof oauth2TokenTestUserId === 'undefined'){
 	console.log('Environment variable OAUTH2_TEST_USER_ID is not set. /testOAuth2 will not work')
 }
-if (isNaN(oauth2TestBackEnd)){
+if (typeof oauth2TestBackEnd === 'undefined'){
 	console.log('Environment variable OAUTH2_TEST_BACK_END is not set. /testBackEnd will not work')
 }
 
-assert(!isNaN(ldapHost),  'Environment variable LDAP_HOST is not set.');
-assert(!isNaN(ldapPort),  'Environment variable LDAP_PORT is not set.');
-assert(!isNaN(ldapBaseDn),  'Environment variable LDAP_BASE_DN is not set.');
-assert(!isNaN(ldapSystemUsername),  'Environment variable LDAP_SYSTEM_USER_NAME is not set.');
-assert(!isNaN(ldapSystemPassword),  'Environment variable LDAP_SYSTEM_PASSWORD is not set.');
-assert(!isNaN(ldapSystemDnSuffix),  'Environment variable LDAP_SYSTEM_DN_SUFFIX is not set.');
-assert(!isNaN(oauth2TokenUrl),  'Environment variable OAUTH2_TOKEN_URL is not set.');
-assert(!isNaN(oauth2ProvisionKey),  'Environment variable OAUTH2_PROVISION_KEY is not set.');
+assert(typeof ldapHost!=='undefined'),  'Environment variable LDAP_HOST is not set.');
+assert(typeof ldapPort!=='undefined'),  'Environment variable LDAP_PORT is not set.');
+assert(typeof ldapBaseDn!=='undefined'),  'Environment variable LDAP_BASE_DN is not set.');
+assert(typeof ldapSystemUsername!=='undefined'),  'Environment variable LDAP_SYSTEM_USER_NAME is not set.');
+assert(typeof ldapSystemPassword!=='undefined'),  'Environment variable LDAP_SYSTEM_PASSWORD is not set.');
+assert(typeof ldapSystemDnSuffix!=='undefined'),  'Environment variable LDAP_SYSTEM_DN_SUFFIX is not set.');
+assert(typeof oauth2TokenUrl!=='undefined'),  'Environment variable OAUTH2_TOKEN_URL is not set.');
+assert(typeof oauth2ProvisionKey!=='undefined'),  'Environment variable OAUTH2_PROVISION_KEY is not set.');
 
 
 module.exports = app;
