@@ -7,6 +7,8 @@ morgan = require('morgan'),
 request = require('request'),
 ldap = require('ldapjs');
 
+var assert = require('assert');
+
 var bodyParser = require('body-parser');
 // Create application/x-www-form-urlencoded parser
 var urlencodedParser = bodyParser.urlencoded({
@@ -21,6 +23,19 @@ app.use(morgan('combined'))
 
 var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080,
 ip = process.env.IP || process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0';
+
+var oauth2TokenUrl=process.env.OAUTH2_TOKEN_URL;
+var oauth2ProvisionKey=process.env.OAUTH2_PROVISION_KEY;
+var oauth2TestBackEnd=process.env.OAUTH2_TEST_BACK_END;
+var oauth2TokenTestClientId=process.env.OAUTH2_TEST_CLIENT_ID;
+var oauth2TokenTestClientSecret=process.env.OAUTH2_TEST_CLIENT_SECRET;
+var oauth2TokenTestUserId=process.env.OAUTH2_TEST_USER_ID;
+var ldapSystemUsername = process.env.LDAP_SYSTEM_USER_NAME;
+var ldapSystemPassword = process.env.LDAP_SYSTEM_PASSWORD;
+var ldapSystemDnSuffix = process.env.LDAP_SYSTEM_DN_SUFFIX;
+var ldapHost = process.env.LDAP_HOST;
+var ldapPort = process.env.LDAP_PORT;
+var ldapBaseDn = process.env.LDAP_BASE_DN;
 
 app.get('/', function (req, res) {
 
@@ -58,7 +73,7 @@ app.get('/pagecount', function (req, res) {
 
 function getAccessToken(res, grantType, clientId, clientSecret, userid) {
 	var options = {
-		url: 'http://kong-proxy.apigw-d0.svc.cluster.local:8000/pagecount/oauth2/token',
+		url: oauth2TokenUrl,
 		method: 'POST',
 		headers: {
 			'x-forwarded-proto': 'https'
@@ -67,7 +82,7 @@ function getAccessToken(res, grantType, clientId, clientSecret, userid) {
 			grant_type: grantType,
 			client_id: clientId,
 			client_secret: clientSecret,
-			provision_key: "fc2502bb56724b9b8e824ba691f3c8b9",
+			provision_key: oauth2ProvisionKey,
 			authenticated_userid: userid
 		}
 	};
@@ -118,12 +133,12 @@ app.post('/oauth2/token', function (req, res) {
 });
 
 app.post('/testOAuth2', function (req, res) {
-	getAccessToken(res, "password", "DummyApp", "d9b779ac11594204afc36a324c237803", "dummy");
+	getAccessToken(res, "password",  oauth2TokenTestClientId, oauth2TokenTestClientSecret, oauth2TokenTestUserId);
 });
 
 app.get('/testBackEnd/', function (req, res) {
 	var options = {
-		url: 'http://kong-proxy.apigw-d0.svc.cluster.local:8000/pagecount',
+		url: oauth2TestBackEnd,
 		method: 'GET'
 	};
 	request(options, function (error, response, body) {
@@ -297,23 +312,16 @@ function createOnLdapUserVerifyFailHandler(client, createOnUserVerifyFailHandler
 }
 
 function verifyLdapUser(loginUsername, loginPassword, onUserVerifySuccess, onUserVerifyFail) {
-	var systemUsername = 'OAuthTestUser1';
-	var systemPassword = 'OAuthTestUser1';
-	var systemDnSuffix = 'OU=IMT,OU=CLK,OU=HQ,OU=Users,OU=CPA,DC=nwow001,DC=corp,DC=ete,DC=cathaypacific,DC=com';
-	var ldapHost = 'ADDS.ETE.CATHAYPACIFIC.COM';
-	var ldapPort = '389';
-	var loginBaseDn = 'OU=IMT,OU=CLK,OU=HQ,OU=Users,OU=CPA,DC=nwow001,DC=corp,DC=ete,DC=cathaypacific,DC=com';
-
 	var userSearchInfo = {
 		loginUsername: loginUsername,
 		loginPassword: loginPassword,
-		loginBaseDn: null,
+		ldapBaseDn: null,
 		loginUserDnCount: 0,
 		loginUserDn: null,
 		verified: false,
 		errorMessage: null
 	}
-	userSearchInfo.loginBaseDn = loginBaseDn;
+	userSearchInfo.loginBaseDn = ldapBaseDn;
 
 	if (!assertUsernamePassword(userSearchInfo)) {
 		onUserVerifyFail(userSearchInfo.errorMessage, userSearchInfo);
@@ -328,10 +336,10 @@ function verifyLdapUser(loginUsername, loginPassword, onUserVerifySuccess, onUse
 	var onLdapUserVerifySuccess = createOnLdapUserVerifySuccessHandler(client, onUserVerifySuccess);
 	var onLdapUserVerifyFail = createOnLdapUserVerifyFailHandler(client, onUserVerifyFail);
 	try {
-		client.bind('cn=' + systemUsername + ',' + systemDnSuffix, systemPassword,
+		client.bind('cn=' + ldapSystemUsername + ',' + ldapSystemDnSuffix, ldapSystemPassword,
 			createOnLdapBindHandler(
 				client,
-				systemUsername,
+				ldapSystemUsername,
 				userSearchInfo,
 				onLdapUserVerifySuccess,
 				onLdapUserVerifyFail));
@@ -358,5 +366,36 @@ app.use(function (err, req, res, next) {
 
 app.listen(port, ip);
 console.log('Server running on http://%s:%s', ip, port);
+
+if (!isNaN(oauth2TokenTestClientId)){
+	console.log('Environment variable OAUTH2_TEST_CLIENT_ID is not set. /testOAuth2 will not work')
+}
+if (!isNaN(oauth2TokenTestClientSecret)){
+	console.log('Environment variable OAUTH2_TEST_CLIENT_SECRET is not set. /testOAuth2 will not work')
+}
+if (!isNaN(oauth2TokenTestUserId)){
+	console.log('Environment variable OAUTH2_TEST_USER_ID is not set. /testOAuth2 will not work')
+}
+if (!isNaN(oauth2TestBackEnd)){
+	console.log('Environment variable OAUTH2_TEST_BACK_END is not set. /testBackEnd will not work')
+}
+
+assert(!isNaN(ldapHost),  'Environment variable LDAP_HOST is not set.');
+assert(!isNaN(ldapPort),  'Environment variable LDAP_PORT is not set.');
+assert(!isNaN(ldapBaseDn),  'Environment variable LDAP_BASE_DN is not set.');
+assert(!isNaN(ldapSystemUsername),  'Environment variable LDAP_SYSTEM_USER_NAME is not set.');
+assert(!isNaN(ldapSystemPassword),  'Environment variable LDAP_SYSTEM_PASSWORD is not set.');
+assert(!isNaN(ldapSystemDnSuffix),  'Environment variable LDAP_SYSTEM_DN_SUFFIX is not set.');
+assert(!isNaN(oauth2TokenUrl),  'Environment variable OAUTH2_TOKEN_URL is not set.');
+assert(!isNaN(oauth2ProvisionKey),  'Environment variable OAUTH2_PROVISION_KEY is not set.');
+
+console.log('ldapHost: '+ldapHost);
+console.log('ldapPort: '+ldapPort);
+console.log('ldapBaseDn: '+ldapBaseDn);
+console.log('ldapSystemUsername: '+ldapSystemUsername);
+console.log('ldapSystemPassword: '+ldapSystemPassword);
+console.log('ldapSystemDnSuffix: '+ldapSystemDnSuffix);
+console.log('oauth2TokenUrl: '+oauth2TokenUrl);
+console.log('oauth2ProvisionKey: '+oauth2ProvisionKey);
 
 module.exports = app;
