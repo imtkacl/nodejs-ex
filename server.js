@@ -364,8 +364,6 @@ app.use(function (err, req, res, next) {
 	res.status(500).send('Something bad happened!');
 });
 
-app.listen(port, ip);
-console.log('Server running on http://%s:%s', ip, port);
 
 console.log('ldapHost: '+ldapHost);
 console.log('ldapPort: '+ldapPort);
@@ -403,5 +401,7 @@ assert(typeof ldapSystemDnSuffix!=='undefined',  'Environment variable LDAP_SYST
 assert(typeof oauth2TokenUrl!=='undefined',  'Environment variable OAUTH2_TOKEN_URL is not set.');
 assert(typeof oauth2ProvisionKey!=='undefined',  'Environment variable OAUTH2_PROVISION_KEY is not set.');
 
+app.listen(port, ip);
+console.log('Server running on http://%s:%s', ip, port);
 
 module.exports = app;
