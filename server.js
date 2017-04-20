@@ -367,16 +367,30 @@ app.use(function (err, req, res, next) {
 app.listen(port, ip);
 console.log('Server running on http://%s:%s', ip, port);
 
-if (!isNaN(oauth2TokenTestClientId)){
+console.log('ldapHost: '+ldapHost);
+console.log('ldapPort: '+ldapPort);
+console.log('ldapBaseDn: '+ldapBaseDn);
+console.log('ldapSystemUsername: '+ldapSystemUsername);
+console.log('ldapSystemPassword: '+ldapSystemPassword);
+console.log('ldapSystemDnSuffix: '+ldapSystemDnSuffix);
+console.log('oauth2TokenUrl: '+oauth2TokenUrl);
+console.log('oauth2ProvisionKey: '+oauth2ProvisionKey);
+
+console.log('oauth2TokenTestClientId: '+oauth2TokenTestClientId);
+console.log('oauth2TokenTestClientSecret: '+oauth2TokenTestClientSecret);
+console.log('oauth2TokenTestUserId: '+oauth2TokenTestUserId);
+console.log('oauth2TestBackEnd: '+oauth2TestBackEnd);
+
+if (isNaN(oauth2TokenTestClientId)){
 	console.log('Environment variable OAUTH2_TEST_CLIENT_ID is not set. /testOAuth2 will not work')
 }
-if (!isNaN(oauth2TokenTestClientSecret)){
+if (isNaN(oauth2TokenTestClientSecret)){
 	console.log('Environment variable OAUTH2_TEST_CLIENT_SECRET is not set. /testOAuth2 will not work')
 }
-if (!isNaN(oauth2TokenTestUserId)){
+if (isNaN(oauth2TokenTestUserId)){
 	console.log('Environment variable OAUTH2_TEST_USER_ID is not set. /testOAuth2 will not work')
 }
-if (!isNaN(oauth2TestBackEnd)){
+if (isNaN(oauth2TestBackEnd)){
 	console.log('Environment variable OAUTH2_TEST_BACK_END is not set. /testBackEnd will not work')
 }
 
@@ -389,13 +403,5 @@ assert(!isNaN(ldapSystemDnSuffix),  'Environment variable LDAP_SYSTEM_DN_SUFFIX 
 assert(!isNaN(oauth2TokenUrl),  'Environment variable OAUTH2_TOKEN_URL is not set.');
 assert(!isNaN(oauth2ProvisionKey),  'Environment variable OAUTH2_PROVISION_KEY is not set.');
 
-console.log('ldapHost: '+ldapHost);
-console.log('ldapPort: '+ldapPort);
-console.log('ldapBaseDn: '+ldapBaseDn);
-console.log('ldapSystemUsername: '+ldapSystemUsername);
-console.log('ldapSystemPassword: '+ldapSystemPassword);
-console.log('ldapSystemDnSuffix: '+ldapSystemDnSuffix);
-console.log('oauth2TokenUrl: '+oauth2TokenUrl);
-console.log('oauth2ProvisionKey: '+oauth2ProvisionKey);
 
 module.exports = app;
