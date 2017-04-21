@@ -365,13 +365,13 @@ app.get('/dynamicResponse', function (req, res) {
 if (typeof testBackEnd !== 'undefined'){
 	console.log('Environment variable TEST_BACK_END is set. /testBackEnd enabled')
 
-	app.get('/testBackEnd/', function (req, res) {
+	app.get('/testBackEnd', function (req, res) {
 		var options = {
 			url: testBackEnd,
 			method: 'GET'
 		};
 		request(options, function (error, response, body) {
-			console.log('error: ' + error.stack);
+			console.log('error: ' + error);
 			console.log('response: ' + response);
 			console.log('body: ' + body);
 			//  console.log('STATUS: ' + res.statusCode);
