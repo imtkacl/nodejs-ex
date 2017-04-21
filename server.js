@@ -37,40 +37,6 @@ var ldapHost = process.env.LDAP_HOST;
 var ldapPort = process.env.LDAP_PORT;
 var ldapBaseDn = process.env.LDAP_BASE_DN;
 
-app.get('/', function (req, res) {
-
-	res.render('index.html', {
-		pageCountMessage: null
-	});
-
-});
-
-app.post('/dumpRequest', function (req, res) {
-	var out = {
-		"header": req.headers,
-		"param": req.query,
-		"body": req.body
-	};
-	res.send(out);
-});
-
-app.get('/pagecount', function (req, res) {
-	// try to initialize the db on every request if it's not already
-	// initialized.
-	var responseCode=extractParameterFromRequest(req, 'x-custom-rsp-code');
-	var responseBody=extractParameterFromRequest(req, 'x-custom-rsp-body');
-	if (responseCode==null){
-		responseCode=200;
-	}
-	if (responseBody==null){
-		responseBody='{ pageCount: 0 }'
-	}
-	console.log(req.headers);
-	res.status(responseCode).send(responseBody);
-	//res.send(req.headers);
-
-});
-
 function getAccessToken(res, grantType, clientId, clientSecret, userid) {
 	var options = {
 		url: oauth2TokenUrl,
@@ -118,49 +84,6 @@ function createOAuthAuthFailHandler(res) {
 	}
 }
 
-app.post('/oauth2/token', function (req, res) {
-	var userid = extractParameterFromRequest(req, 'username');
-	verifyLdapUser(
-		userid,
-		extractParameterFromRequest(req, 'password'),
-		createGetAccessTokenHandler(
-			res,
-			extractParameterFromRequest(req, 'grant_type'),
-			extractParameterFromRequest(req, 'client_id'),
-			extractParameterFromRequest(req, 'client_secret'),
-			userid),
-		createOAuthAuthFailHandler(res));
-});
-
-app.post('/testOAuth2', function (req, res) {
-	getAccessToken(res, "password",  oauth2TokenTestClientId, oauth2TokenTestClientSecret, oauth2TokenTestUserId);
-});
-
-app.get('/testBackEnd/', function (req, res) {
-	var options = {
-		url: oauth2TestBackEnd,
-		method: 'GET'
-	};
-	request(options, function (error, response, body) {
-		console.log('error: ' + error.stack);
-		console.log('response: ' + response);
-		console.log('body: ' + body);
-		//  console.log('STATUS: ' + res.statusCode);
-		//  console.log('HEADERS: ' + JSON.stringify(res.headers));
-		//  res.setEncoding('utf8');
-		//  res.on('data', function (chunk) {
-		//    console.log('BODY: ' + chunk);
-		//    });
-		if (error) {
-			res.status(500).send(error);
-		} else if (response.statusCode == 200) {
-			res.status(response.statusCode).send(body);
-		} else {
-			res.status(response.statusCode).send(body);
-		}
-
-	});
-});
 
 function extractParameterFromRequest(req, parameterName) {
 	var parameterValue = null;
@@ -379,18 +302,6 @@ console.log('oauth2TokenTestClientSecret: '+oauth2TokenTestClientSecret);
 console.log('oauth2TokenTestUserId: '+oauth2TokenTestUserId);
 console.log('oauth2TestBackEnd: '+oauth2TestBackEnd);
 
-if (typeof oauth2TokenTestClientId === 'undefined'){
-	console.log('Environment variable OAUTH2_TEST_CLIENT_ID is not set. /testOAuth2 will not work')
-}
-if (typeof oauth2TokenTestClientSecret === 'undefined'){
-	console.log('Environment variable OAUTH2_TEST_CLIENT_SECRET is not set. /testOAuth2 will not work')
-}
-if (typeof oauth2TokenTestUserId === 'undefined'){
-	console.log('Environment variable OAUTH2_TEST_USER_ID is not set. /testOAuth2 will not work')
-}
-if (typeof oauth2TestBackEnd === 'undefined'){
-	console.log('Environment variable OAUTH2_TEST_BACK_END is not set. /testBackEnd will not work')
-}
 
 assert(typeof ldapHost!=='undefined',  'Environment variable LDAP_HOST is not set.');
 assert(typeof ldapPort!=='undefined',  'Environment variable LDAP_PORT is not set.');
@@ -400,6 +311,95 @@ assert(typeof ldapSystemPassword!=='undefined',  'Environment variable LDAP_SYST
 assert(typeof ldapSystemDnSuffix!=='undefined',  'Environment variable LDAP_SYSTEM_DN_SUFFIX is not set.');
 assert(typeof oauth2TokenUrl!=='undefined',  'Environment variable OAUTH2_TOKEN_URL is not set.');
 assert(typeof oauth2ProvisionKey!=='undefined',  'Environment variable OAUTH2_PROVISION_KEY is not set.');
+
+app.post('/oauth2/token', function (req, res) {
+	var userid = extractParameterFromRequest(req, 'username');
+	verifyLdapUser(
+		userid,
+		extractParameterFromRequest(req, 'password'),
+		createGetAccessTokenHandler(
+			res,
+			extractParameterFromRequest(req, 'grant_type'),
+			extractParameterFromRequest(req, 'client_id'),
+			extractParameterFromRequest(req, 'client_secret'),
+			userid),
+		createOAuthAuthFailHandler(res));
+});
+
+app.get('/', function (req, res) {
+
+	res.render('index.html', {
+		pageCountMessage: null
+	});
+
+});
+
+app.post('/dumpRequest', function (req, res) {
+	var out = {
+		"header": req.headers,
+		"param": req.query,
+		"body": req.body
+	};
+	res.send(out);
+});
+
+app.get('/dynamicResponse', function (req, res) {
+	// try to initialize the db on every request if it's not already
+	// initialized.
+	var responseCode=extractParameterFromRequest(req, 'x-custom-rsp-code');
+	var responseBody=extractParameterFromRequest(req, 'x-custom-rsp-body');
+	if (responseCode==null){
+		responseCode=200;
+	}
+	if (responseBody==null){
+		responseBody='{ response: default }'
+	}
+	console.log(req.headers);
+	res.status(responseCode).send(responseBody);
+	//res.send(req.headers);
+
+});
+
+
+
+if (typeof oauth2TestBackEnd !== 'undefined'){
+	console.log('Environment variable OAUTH2_TEST_BACK_END is set. /testBackEnd enabled')
+
+	app.get('/testBackEnd/', function (req, res) {
+		var options = {
+			url: oauth2TestBackEnd,
+			method: 'GET'
+		};
+		request(options, function (error, response, body) {
+			console.log('error: ' + error.stack);
+			console.log('response: ' + response);
+			console.log('body: ' + body);
+			//  console.log('STATUS: ' + res.statusCode);
+			//  console.log('HEADERS: ' + JSON.stringify(res.headers));
+			//  res.setEncoding('utf8');
+			//  res.on('data', function (chunk) {
+			//    console.log('BODY: ' + chunk);
+			//    });
+			if (error) {
+				res.status(500).send(error);
+			} else if (response.statusCode == 200) {
+				res.status(response.statusCode).send(body);
+			} else {
+				res.status(response.statusCode).send(body);
+			}
+
+		});
+	});
+}
+
+
+if (typeof oauth2TokenTestClientId !== 'undefined' && typeof oauth2TokenTestClientSecret !== 'undefined' && typeof oauth2TokenTestUserId !== 'undefined'){
+	console.log('Environment variable OAUTH2_TEST_CLIENT_ID, OAUTH2_TEST_CLIENT_SECRET and OAUTH2_TEST_USER_ID are set. /testOAuth2 enabled')
+
+	app.post('/testOAuth2', function (req, res) {
+		getAccessToken(res, "password",  oauth2TokenTestClientId, oauth2TokenTestClientSecret, oauth2TokenTestUserId);
+	});
+}
 
 app.listen(port, ip);
 console.log('Server running on http://%s:%s', ip, port);
