@@ -26,7 +26,7 @@ ip = process.env.IP || process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0';
 
 var oauth2TokenUrl=process.env.OAUTH2_TOKEN_URL;
 var oauth2ProvisionKey=process.env.OAUTH2_PROVISION_KEY;
-var oauth2TestBackEnd=process.env.OAUTH2_TEST_BACK_END;
+var testBackEnd=process.env.TEST_BACK_END;
 var oauth2TokenTestClientId=process.env.OAUTH2_TEST_CLIENT_ID;
 var oauth2TokenTestClientSecret=process.env.OAUTH2_TEST_CLIENT_SECRET;
 var oauth2TokenTestUserId=process.env.OAUTH2_TEST_USER_ID;
@@ -300,7 +300,7 @@ console.log('oauth2ProvisionKey: '+oauth2ProvisionKey);
 console.log('oauth2TokenTestClientId: '+oauth2TokenTestClientId);
 console.log('oauth2TokenTestClientSecret: '+oauth2TokenTestClientSecret);
 console.log('oauth2TokenTestUserId: '+oauth2TokenTestUserId);
-console.log('oauth2TestBackEnd: '+oauth2TestBackEnd);
+console.log('testBackEnd: '+testBackEnd);
 
 
 assert(typeof ldapHost!=='undefined',  'Environment variable LDAP_HOST is not set.');
@@ -362,12 +362,12 @@ app.get('/dynamicResponse', function (req, res) {
 
 
 
-if (typeof oauth2TestBackEnd !== 'undefined'){
-	console.log('Environment variable OAUTH2_TEST_BACK_END is set. /testBackEnd enabled')
+if (typeof testBackEnd !== 'undefined'){
+	console.log('Environment variable TEST_BACK_END is set. /testBackEnd enabled')
 
 	app.get('/testBackEnd/', function (req, res) {
 		var options = {
-			url: oauth2TestBackEnd,
+			url: testBackEnd,
 			method: 'GET'
 		};
 		request(options, function (error, response, body) {
