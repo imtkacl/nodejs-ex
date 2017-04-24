@@ -86,7 +86,7 @@ function createOAuthAuthFailHandler(res) {
 
 
 function extractParameterFromRequest(req, parameterName) {
-	var parameterValue = null;
+	var parameterValue = "";
 	if (req.body[parameterName] != null) {
 		parameterValue = req.body[parameterName];
 	} else if (req.headers[parameterName] != null) {
